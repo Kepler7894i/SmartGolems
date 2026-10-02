@@ -27,7 +27,7 @@ The golem behaviour runs on the **server**, so the mod must be installed there (
 
 ## Download and install
 
-Current target: **Minecraft 26.3**, mod version **1.0.0**.
+Current target: **Minecraft 26.3**, mod version **1.1.0**.
 
 Jars are on the [Releases page](../../releases): `smartgolems-fabric-26.3-<version>.jar` and `smartgolems-neoforge-26.3-<version>.jar`. The easy way is the install script for your OS, which also fetches Fabric API if you are on Fabric and don't have it. Or do it by hand: put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder.
 
@@ -118,7 +118,7 @@ The mod changes how a golem chooses its next chest (a mixin on `TransportItemsBe
 
 Two versions are tracked, both only in [gradle.properties](gradle.properties):
 
-- `version`: the mod's own version (1.0.0).
+- `version`: the mod's own version (1.1.0).
 - `minecraftVersion`: the Minecraft version it targets (26.3).
 
 Everything else derives from them: the jar names (`smartgolems-<loader>-<minecraftVersion>-<version>.jar`), the mod metadata (`fabric.mod.json`, `neoforge.mods.toml`), the release tag, name and notes, the install scripts and this README.
