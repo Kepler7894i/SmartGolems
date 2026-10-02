@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "waxed_overflow_chest",
+  "ingredients": [
+    "smartgolems:weathered_overflow_chest",
+    "minecraft:honeycomb"
+  ],
+  "result": {
+    "id": "smartgolems:waxed_weathered_overflow_chest"
+  }
+}

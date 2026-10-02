@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:chest",
+    "-": "minecraft:copper_block"
+  },
+  "pattern": [
+    "-",
+    "#",
+    "-"
+  ],
+  "result": {
+    "id": "smartgolems:overflow_chest"
+  }
+}

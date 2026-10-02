@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.smartgolems.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BlockEntityTypeAccessor",
+    "TransportItemsBetweenContainersMixin"
+  ],
+  "client": [
+    "client.ChestRenderStateMixin",
+    "client.ChestRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

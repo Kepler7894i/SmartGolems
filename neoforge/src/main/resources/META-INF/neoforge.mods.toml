@@ -1,0 +1,30 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/Kepler7894i/SmartGolems/issues"
+
+[[mods]]
+modId = "smartgolems"
+version = "${version}"
+displayName = "Smart Copper Golems"
+displayURL = "https://github.com/Kepler7894i/SmartGolems"
+iconFile = "assets/smartgolems/icon.png"
+authors = "Sam MacKay"
+description = "Copper golems know what is in every chest in range and walk straight to the right one. Adds the Overflow Chest, where they leave items that have no home, and a config for their search radius."
+
+[[mixins]]
+config = "smartgolems.mixins.json"
+
+[[dependencies.smartgolems]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${minecraft_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.smartgolems]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${minecraft_version},)"
+ordering = "NONE"
+side = "BOTH"

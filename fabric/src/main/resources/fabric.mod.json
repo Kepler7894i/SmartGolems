@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "smartgolems",
+	"version": "${version}",
+	"name": "Smart Copper Golems",
+	"description": "Copper golems know what is in every chest in range and walk straight to the right one. Adds the Overflow Chest, where they leave items that have no home, and a config for their search radius.",
+	"authors": [
+		"Sam MacKay"
+	],
+	"contact": {
+		"homepage": "https://github.com/Kepler7894i/SmartGolems",
+		"sources": "https://github.com/Kepler7894i/SmartGolems",
+		"issues": "https://github.com/Kepler7894i/SmartGolems/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/smartgolems/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.smartgolems.fabric.SmartGolemsFabric"
+		]
+	},
+	"mixins": [
+		"smartgolems.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=${fabric_loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
