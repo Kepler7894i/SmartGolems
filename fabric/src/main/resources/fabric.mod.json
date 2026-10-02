@@ -12,7 +12,7 @@
 		"sources": "https://github.com/Kepler7894i/SmartGolems",
 		"issues": "https://github.com/Kepler7894i/SmartGolems/issues"
 	},
-	"license": "MIT",
+	"license": "LGPL-3.0-or-later",
 	"icon": "assets/smartgolems/icon.png",
 	"environment": "*",
 	"entrypoints": {
