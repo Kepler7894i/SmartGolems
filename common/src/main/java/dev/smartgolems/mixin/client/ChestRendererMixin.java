@@ -35,8 +35,13 @@ public abstract class ChestRendererMixin {
 		SpriteId sprite = null;
 		if (blockEntity.getBlockState().getBlock() instanceof OverflowChestBlock chest) {
 			final WeatherState weatherState = chest.getState();
-			final String suffix = weatherState == WeatherState.UNAFFECTED ? "" : "_" + weatherState.getSerializedName();
-			sprite = Sheets.CHEST_MAPPER.apply(SmartGolemsMod.id(OverflowChests.TEXTURE_PREFIX + suffix));
+			final String stage = weatherState == WeatherState.UNAFFECTED ? "" : "_" + weatherState.getSerializedName();
+			final String half = switch (state.type) {
+				case LEFT -> "_left";
+				case RIGHT -> "_right";
+				default -> "";
+			};
+			sprite = Sheets.CHEST_MAPPER.apply(SmartGolemsMod.id(OverflowChests.TEXTURE_PREFIX + stage + half));
 		}
 		((OverflowSpriteHolder) state).smartgolems$setOverflowSprite(sprite);
 	}

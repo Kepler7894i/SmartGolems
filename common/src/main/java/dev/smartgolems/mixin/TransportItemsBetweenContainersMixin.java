@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * <ul>
  * <li>picking up: the nearest copper chest that is not empty</li>
  * <li>putting down: the nearest chest that already holds the item (and has room), else the nearest Overflow Chest with room,
- * else (as in vanilla) the nearest empty chest</li>
+ * else nothing (the golem keeps the item; it never dumps it in an unrelated chest)</li>
  * </ul>
  * It also applies the configured search radius, and lets golems deliver into Overflow Chests.
  */
@@ -109,7 +109,8 @@ public abstract class TransportItemsBetweenContainersMixin {
 		if (this.target != null && body instanceof CopperGolem && this.target.state().getBlock() instanceof OverflowChestBlock) {
 			return Sorting.hasRoomFor(container, body.getMainHandItem());
 		}
-		return container.isEmpty() || Sorting.contains(container, body.getMainHandItem());
+		// Unlike vanilla, an empty chest is not a place to leave things: only a chest that already holds the item will do.
+		return Sorting.contains(container, body.getMainHandItem());
 	}
 
 	@Inject(method = "getTransportTarget", at = @At("HEAD"), cancellable = true)
@@ -130,11 +131,9 @@ public abstract class TransportItemsBetweenContainersMixin {
 		TransportItemsBetweenContainers.TransportItemTarget sourceChest = null;
 		TransportItemsBetweenContainers.TransportItemTarget matchingChest = null;
 		TransportItemsBetweenContainers.TransportItemTarget overflowChest = null;
-		TransportItemsBetweenContainers.TransportItemTarget emptyChest = null;
 		double sourceDistance = Double.MAX_VALUE;
 		double matchingDistance = Double.MAX_VALUE;
 		double overflowDistance = Double.MAX_VALUE;
-		double emptyDistance = Double.MAX_VALUE;
 
 		for (final ChunkPos chunkPos : chunks) {
 			final LevelChunk chunk = level.getChunkSource().getChunkNow(chunkPos.x(), chunkPos.z());
@@ -167,9 +166,6 @@ public abstract class TransportItemsBetweenContainersMixin {
 						matchingChest = candidate;
 						matchingDistance = distance;
 					}
-				} else if (distance < emptyDistance && container.isEmpty()) {
-					emptyChest = candidate;
-					emptyDistance = distance;
 				}
 			}
 		}
@@ -179,10 +175,8 @@ public abstract class TransportItemsBetweenContainersMixin {
 			chosen = sourceChest;
 		} else if (matchingChest != null) {
 			chosen = matchingChest;
-		} else if (overflowChest != null) {
-			chosen = overflowChest;
 		} else {
-			chosen = emptyChest;
+			chosen = overflowChest;
 		}
 		cir.setReturnValue(Optional.ofNullable(chosen));
 	}

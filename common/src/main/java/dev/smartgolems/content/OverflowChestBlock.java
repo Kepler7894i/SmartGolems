@@ -1,15 +1,20 @@
 package dev.smartgolems.content;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.CopperChestBlock;
@@ -17,6 +22,7 @@ import net.minecraft.world.level.block.WeatheringCopper.WeatherState;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -41,9 +47,50 @@ public class OverflowChestBlock extends ChestBlock {
 		return true;
 	}
 
+	/** Overflow Chests join into double chests with each other, whatever their oxidation or wax. */
 	@Override
 	public boolean chestCanConnectTo(final BlockState blockState) {
-		return false;
+		return blockState.getBlock() instanceof OverflowChestBlock && blockState.hasProperty(ChestBlock.TYPE);
+	}
+
+	@Override
+	public BlockState getStateForPlacement(final BlockPlaceContext context) {
+		final BlockState state = super.getStateForPlacement(context);
+		return state == null ? null : leastOxidizedOfConnected(state, context.getLevel(), context.getClickedPos());
+	}
+
+	@Override
+	protected BlockState updateShape(
+		final BlockState state, final LevelReader level, final ScheduledTickAccess ticks, final BlockPos pos, final Direction directionToNeighbour,
+		final BlockPos neighbourPos, final BlockState neighbourState, final RandomSource random
+	) {
+		final BlockState updated = super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
+		// Both halves of a double chest always stay the same block (oxidation, wax), so when one changes the other follows it.
+		if (this.chestCanConnectTo(neighbourState)
+			&& updated.getValue(ChestBlock.TYPE) != ChestType.SINGLE
+			&& getConnectedDirection(updated) == directionToNeighbour) {
+			return neighbourState.getBlock().withPropertiesOf(updated);
+		}
+		return updated;
+	}
+
+	/** A new half joining an existing chest takes the less oxidized of the two; if only one is waxed, both become unwaxed. */
+	private static BlockState leastOxidizedOfConnected(final BlockState state, final Level level, final BlockPos pos) {
+		if (state.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
+			return state;
+		}
+		final BlockState other = level.getBlockState(pos.relative(getConnectedDirection(state)));
+		if (!(state.getBlock() instanceof OverflowChestBlock mine) || !(other.getBlock() instanceof OverflowChestBlock theirs)) {
+			return state;
+		}
+		BlockState mineState = state;
+		BlockState theirState = other;
+		if (mine.isWaxed() != theirs.isWaxed()) {
+			mineState = mine.isWaxed() ? OverflowChests.WEATHERING.pick(mine.weatherState).withPropertiesOf(state) : state;
+			theirState = theirs.isWaxed() ? OverflowChests.WEATHERING.pick(theirs.weatherState).withPropertiesOf(other) : other;
+		}
+		final Block least = mine.weatherState.ordinal() <= theirs.weatherState.ordinal() ? mineState.getBlock() : theirState.getBlock();
+		return least.withPropertiesOf(mineState);
 	}
 
 	@Override

@@ -10,10 +10,11 @@ A **Fabric** and **NeoForge** mod for **Minecraft 26.2** that makes copper golem
 
 - **Golems know what is in your chests.** A vanilla golem visits chests one at a time until it finds a match. With this mod it checks the contents of every chest in range up front:
   - *picking up*: it goes to the nearest copper chest that is not empty;
-  - *putting down*: it goes to the nearest chest that already holds that item (and has room), otherwise the nearest Overflow Chest with room, otherwise (as in vanilla) the nearest empty chest.
+  - *putting down*: it goes to the nearest chest that already holds that item (and has room), otherwise to the nearest Overflow Chest with room. It **never** leaves an item in an unrelated chest: an empty chest is not a destination (unlike vanilla), so a regular chest needs one of an item in it before golems will deliver that item there.
 - **Overflow Chest**: a copper chest with a black lock where golems leave items that have no home.
   - It oxidizes through the four copper stages, can be waxed with honeycomb and scraped or unwaxed with an axe, exactly like a copper chest.
-  - It is a single chest (it never joins up into a double chest), and golems only ever deliver to it, never take items back out.
+  - It can be a **double chest**: two Overflow Chests placed side by side join up like regular chests. Both halves always match (the less oxidized one wins when you join them; if only one is waxed, both become unwaxed). Regular copper chests can be doubled too, as in vanilla, and golems treat a double chest as one big chest.
+  - Golems only ever deliver to it, never take items back out.
 - **Configurable search radius**: how far a golem looks for chests and walks to them (vanilla: 32 blocks sideways, 8 up and down).
 
 ## Requirements
@@ -26,7 +27,7 @@ The golem behaviour runs on the **server**, so the mod must be installed there (
 
 ## Download and install
 
-Current target: **Minecraft 26.2**, mod version **1.0.0**.
+Current target: **Minecraft 26.2**, mod version **1.1.0**.
 
 Jars are on the [Releases page](../../releases): `smartgolems-fabric-26.2-<version>.jar` and `smartgolems-neoforge-26.2-<version>.jar`. The easy way is the install script for your OS, which also fetches Fabric API if you are on Fabric and don't have it. Or do it by hand: put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder.
 
@@ -71,11 +72,11 @@ Close Minecraft (and any server using the folder) first; Windows won't let a run
 
 ### Setting up golems
 
-Vanilla rules still apply: a golem takes items out of **copper chests** and delivers them to **regular chests** (and trapped chests). A typical setup is an input copper chest, a row of regular chests holding one kind of item each, and an Overflow Chest for the rest. A copper golem is built from a copper block and a carved pumpkin.
+Vanilla rules still apply: a golem takes items out of **copper chests** and delivers them to **regular chests** (and trapped chests). A typical setup is an input copper chest, a row of regular chests each already holding one kind of item (put one item in each to teach it what belongs there), and an Overflow Chest for everything else. A copper golem is built from a copper block and a carved pumpkin.
 
 ### The Overflow Chest
 
-Craft it like a shulker box: a **chest** between two **copper blocks**, stacked vertically.
+Craft it like a shulker box: a **chest** between two **copper blocks**, stacked vertically. Place two next to each other to make a double chest.
 
 ```
 copper block
@@ -83,7 +84,7 @@ chest
 copper block
 ```
 
-Items a golem is carrying that match no chest in range go here. If there is no Overflow Chest (or it is full), the golem falls back to the nearest empty chest, and if there is none it keeps the item until something changes. Honeycomb waxes it (crafting `chest + honeycomb` also works); an axe scrapes one oxidation stage or removes the wax.
+Items a golem is carrying that match no chest in range always go here, however many empty chests are around. If there is no Overflow Chest in range (or it is full), the golem simply keeps the item until something changes. Honeycomb waxes it (crafting `chest + honeycomb` also works); an axe scrapes one oxidation stage or removes the wax.
 
 ### Configuration
 
@@ -117,7 +118,7 @@ The mod changes how a golem chooses its next chest (a mixin on `TransportItemsBe
 
 Two versions are tracked, both only in [gradle.properties](gradle.properties):
 
-- `version`: the mod's own version (1.0.0).
+- `version`: the mod's own version (1.1.0).
 - `minecraftVersion`: the Minecraft version it targets (26.2).
 
 Everything else derives from them: the jar names (`smartgolems-<loader>-<minecraftVersion>-<version>.jar`), the mod metadata (`fabric.mod.json`, `neoforge.mods.toml`), the release tag, name and notes, the install scripts and this README.

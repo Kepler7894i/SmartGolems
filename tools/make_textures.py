@@ -10,21 +10,20 @@ src = Path(sys.argv[1])
 out = Path(__file__).resolve().parent.parent / "common/src/main/resources/assets/smartgolems/textures/entity/chest"
 out.mkdir(parents=True, exist_ok=True)
 
-# The lock is the only gray in the unaffected copper texture (copper itself is clearly orange); the same pixels are the lock in every stage.
-base = Image.open(src / "copper.png").convert("RGBA")
-lock = {(x, y) for y in range(base.height) for x in range(base.width)
-        if base.getpixel((x, y))[3] and max(base.getpixel((x, y))[:3]) - min(base.getpixel((x, y))[:3]) < 30}
+STAGES = [("copper", "overflow"), ("copper_exposed", "overflow_exposed"),
+          ("copper_weathered", "overflow_weathered"), ("copper_oxidized", "overflow_oxidized")]
 
-for vanilla, ours in [("copper", "overflow"), ("copper_exposed", "overflow_exposed"),
-                      ("copper_weathered", "overflow_weathered"), ("copper_oxidized", "overflow_oxidized")]:
-    im = Image.open(src / f"{vanilla}.png").convert("RGBA")
-    changed = 0
-    for y in range(im.height):
-        for x in range(im.width):
+# Single chests and the two halves of a double chest each have their own texture.
+for part in ("", "_left", "_right"):
+    # The lock is the only gray in the unaffected copper texture (copper itself is clearly orange); the same pixels are the lock in every stage.
+    base = Image.open(src / f"copper{part}.png").convert("RGBA")
+    lock = {(x, y) for y in range(base.height) for x in range(base.width)
+            if base.getpixel((x, y))[3] and max(base.getpixel((x, y))[:3]) - min(base.getpixel((x, y))[:3]) < 30}
+    for vanilla, ours in STAGES:
+        im = Image.open(src / f"{vanilla}{part}.png").convert("RGBA")
+        for x, y in lock:
             r, g, b, a = im.getpixel((x, y))
-            if (x, y) in lock:
-                v = int((r + g + b) / 3 * 0.22)
-                im.putpixel((x, y), (v, v, v + 2, a))
-                changed += 1
-    im.save(out / f"{ours}.png")
-    print(ours, "lock pixels:", changed)
+            v = int((r + g + b) / 3 * 0.22)
+            im.putpixel((x, y), (v, v, v + 2, a))
+        im.save(out / f"{ours}{part}.png")
+        print(f"{ours}{part}", "lock pixels:", len(lock))
