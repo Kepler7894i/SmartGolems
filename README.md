@@ -1,6 +1,8 @@
 <!-- GENERATED FILE: edit README.template.md instead (see tools/RenderReadme.java). -->
 # Smart Copper Golems
 
+<img src="docs/gallery/icon-512-background.png" alt="The Overflow Chest" width="128" align="right">
+
 A **Fabric** and **NeoForge** mod for **Minecraft 26.3** that makes copper golems stop wandering from chest to chest looking for the right one. They know what is in every chest in range, walk straight to the right one, and leave items nobody wants in a dedicated **Overflow Chest**.
 
 > The Minecraft version shown in this README is not typed in by hand: it is read from `minecraftVersion` in [gradle.properties](gradle.properties)
@@ -16,6 +18,23 @@ A **Fabric** and **NeoForge** mod for **Minecraft 26.3** that makes copper golem
   - It can be a **double chest**: two Overflow Chests placed side by side join up like regular chests. Both halves always match (the less oxidized one wins when you join them; if only one is waxed, both become unwaxed). Regular copper chests can be doubled too, as in vanilla, and golems treat a double chest as one big chest.
   - Golems only ever deliver to it, never take items back out.
 - **Configurable search radius**: how far a golem looks for chests and walks to them (vanilla: 32 blocks sideways, 8 up and down).
+
+## Screenshots
+
+The Overflow Chest in its four oxidation stages (left to right), next to a vanilla copper chest with its grey lock and a double Overflow Chest:
+
+![Overflow Chests: unaffected, exposed, weathered, oxidized, a copper chest, and a double Overflow Chest](docs/gallery/overflow-chest-stages.png)
+
+A golem leaves an item that has no home in the Overflow Chest, walking past the empty chests on either side:
+
+![A copper golem putting a diamond into an Overflow Chest](docs/gallery/golem-delivers-to-overflow-chest.png)
+
+Everything else is sorted by contents: the golem takes items from a copper chest and goes straight to the chest that already holds them.
+
+![A copper golem taking cobblestone from a copper chest](docs/gallery/golem-picks-up-from-copper-chest.png)
+![A copper golem putting cobblestone into the chest that already holds cobblestone](docs/gallery/golem-delivers-to-matching-chest.png)
+
+The icon and all screenshots are in [docs/gallery](docs/gallery): `icon-512.png` (transparent) and `icon-512-background.png` are ready to use for a Modrinth project page.
 
 ## Requirements
 

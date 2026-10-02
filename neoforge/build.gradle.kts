@@ -18,7 +18,7 @@ neoForge {
             client()
             // ./gradlew :neoforge:runClient -PquickPlay=127.0.0.1:25565 joins a server straight away (for testing).
             if (project.hasProperty("quickPlay")) {
-                programArguments.addAll("--quickPlayMultiplayer", project.property("quickPlay") as String, "--username", "Tester")
+                programArguments.addAll("--quickPlayMultiplayer", project.property("quickPlay") as String, "--username", "Tester", "--width", "1280", "--height", "720")
             }
         }
         create("server") { server() }
