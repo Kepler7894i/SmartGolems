@@ -1,7 +1,7 @@
 <!-- GENERATED FILE: edit README.template.md instead (see tools/RenderReadme.java). -->
 # Smart Copper Golems
 
-A **Fabric** and **NeoForge** mod for **Minecraft 26.3** that makes copper golems stop wandering from chest to chest looking for the right one. They know what is in every chest in range, walk straight to the right one, and leave items nobody wants in a dedicated **Overflow Chest**.
+A **Fabric** and **NeoForge** mod for **Minecraft 26.2** that makes copper golems stop wandering from chest to chest looking for the right one. They know what is in every chest in range, walk straight to the right one, and leave items nobody wants in a dedicated **Overflow Chest**.
 
 > The Minecraft version shown in this README is not typed in by hand: it is read from `minecraftVersion` in [gradle.properties](gradle.properties)
 > and filled in by `tools/RenderReadme.java` (run automatically on every push to `main`). Edit `README.template.md`, not `README.md`.
@@ -18,17 +18,17 @@ A **Fabric** and **NeoForge** mod for **Minecraft 26.3** that makes copper golem
 
 ## Requirements
 
-- Minecraft **26.3**
-- **Fabric**: [Fabric Loader](https://fabricmc.net/use/) 0.19.5 or newer and [Fabric API](https://modrinth.com/mod/fabric-api). **NeoForge**: [NeoForge](https://neoforged.net/) 26.3.0.40-beta or newer.
-- Java 25 (the Java Minecraft 26.3 itself uses)
+- Minecraft **26.2**
+- **Fabric**: [Fabric Loader](https://fabricmc.net/use/) 0.19.5 or newer and [Fabric API](https://modrinth.com/mod/fabric-api). **NeoForge**: [NeoForge](https://neoforged.net/) 26.2.0.88 or newer.
+- Java 25 (the Java Minecraft 26.2 itself uses)
 
 The golem behaviour runs on the **server**, so the mod must be installed there (in single player that is automatic). Because the Overflow Chest is a new block, clients that join need the mod too.
 
 ## Download and install
 
-Current target: **Minecraft 26.3**, mod version **1.0.0**.
+Current target: **Minecraft 26.2**, mod version **1.0.0**.
 
-Jars are on the [Releases page](../../releases): `smartgolems-fabric-26.3-<version>.jar` and `smartgolems-neoforge-26.3-<version>.jar`. The easy way is the install script for your OS, which also fetches Fabric API if you are on Fabric and don't have it. Or do it by hand: put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder.
+Jars are on the [Releases page](../../releases): `smartgolems-fabric-26.2-<version>.jar` and `smartgolems-neoforge-26.2-<version>.jar`. The easy way is the install script for your OS, which also fetches Fabric API if you are on Fabric and don't have it. Or do it by hand: put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder.
 
 ### Install scripts
 
@@ -118,7 +118,7 @@ The mod changes how a golem chooses its next chest (a mixin on `TransportItemsBe
 Two versions are tracked, both only in [gradle.properties](gradle.properties):
 
 - `version`: the mod's own version (1.0.0).
-- `minecraftVersion`: the Minecraft version it targets (26.3).
+- `minecraftVersion`: the Minecraft version it targets (26.2).
 
 Everything else derives from them: the jar names (`smartgolems-<loader>-<minecraftVersion>-<version>.jar`), the mod metadata (`fabric.mod.json`, `neoforge.mods.toml`), the release tag, name and notes, the install scripts and this README.
 

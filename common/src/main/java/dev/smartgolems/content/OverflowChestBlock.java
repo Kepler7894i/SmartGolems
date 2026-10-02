@@ -64,10 +64,10 @@ public class OverflowChestBlock extends ChestBlock {
 		if (stack.is(ItemTags.AXES)) {
 			if (this.isWaxed()) {
 				change(level, pos, state, OverflowChests.WEATHERING.pick(this.weatherState), player, 3004);
-				level.playSound(player, pos, SoundEvents.AXE_WAX_OFF.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.playSound(player, pos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
 			} else if (this.weatherState != WeatherState.UNAFFECTED) {
 				change(level, pos, state, OverflowChests.WEATHERING.pick(this.weatherState.previous()), player, 3005);
-				level.playSound(player, pos, SoundEvents.AXE_SCRAPE.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.playSound(player, pos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
 			} else {
 				return super.useItemOn(stack, state, level, pos, player, hand, hit);
 			}
