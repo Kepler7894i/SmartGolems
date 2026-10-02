@@ -165,4 +165,6 @@ The code is split like this: `common/` has everything that doesn't depend on a m
 
 ## Licence
 
-[MIT](LICENSE).
+[GNU Lesser General Public License v3.0 or later](LICENSE) (LGPL-3.0-or-later). The LGPL is an addition to the GNU GPL v3, whose text is in [LICENSE.GPL](LICENSE.GPL).
+
+In short: you may use the mod, including in modpacks and alongside mods under any licence. If you distribute the mod or a modified version of it, you must make the source of the mod (with your changes) available under the LGPL and keep the licence notices.

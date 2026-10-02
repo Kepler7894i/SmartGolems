@@ -37,7 +37,8 @@ configure(subprojects.filter { it.name != "common" }) {
     }
 
     tasks.named<Jar>("jar") {
-        from(rootProject.file("LICENSE")) {
+        // The LGPL is an addition to the GPL, so both texts ship in the jar.
+        from(rootProject.files("LICENSE", "LICENSE.GPL")) {
             rename { "${it}_smartgolems" }
         }
     }
