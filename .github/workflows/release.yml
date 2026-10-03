@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Also publish the jars to Modrinth and CurseForge
+        description: Builds releases for GitHub and publishes the jars to Modrinth and CurseForge
         type: boolean
         default: false
 
