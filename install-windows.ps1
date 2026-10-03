@@ -10,7 +10,7 @@
 
   Dependencies installed automatically (skip with -NoDeps):
     - Fabric API (Fabric only), only if the mods folder has no fabric-api jar yet (an existing one is never replaced).
-  Fabric Loader / NeoForge themselves are assumed to be installed already and are never touched.
+  Fabric Loader / NeoForge / Forge themselves are assumed to be installed already and are never touched.
 
   Older copies of Smart Copper Golems for the same loader in the mods folder are replaced, so two versions never load together.
   The mod must be installed on the server too (point -ModsDir at the server's mods folder); clients and servers use the same jar.
@@ -19,7 +19,7 @@
   Target mods folder. Defaults to %APPDATA%\.minecraft\mods. Use this to install into a server or another launcher's instance.
 
 .PARAMETER Loader
-  fabric (default) or neoforge.
+  fabric (default), neoforge or forge.
 
 .PARAMETER SkipBuild
   Use the jar already in <loader>\build\libs instead of rebuilding.
@@ -34,7 +34,7 @@
 #>
 param(
     [string]$ModsDir = (Join-Path $env:APPDATA ".minecraft\mods"),
-    [ValidateSet("fabric", "neoforge")][string]$Loader = "fabric",
+    [ValidateSet("fabric", "neoforge", "forge")][string]$Loader = "fabric",
     [switch]$SkipBuild,
     [switch]$NoDeps
 )

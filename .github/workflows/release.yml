@@ -7,11 +7,22 @@ name: Release
 #   - If it does not build (e.g. mid-port to a new Minecraft version), the release still contains the
 #     version-specific source snapshot so that state can be recovered.
 # To release a change, bump `version` in gradle.properties.
+#
+# Publishing to Modrinth and CurseForge happens in the same run, but only when a push changes `version` (or the workflow is started by hand with
+# "publish" ticked), so ordinary pushes only refresh the GitHub release. It needs (Settings > Secrets and variables > Actions):
+#   secrets   MODRINTH_TOKEN, CURSEFORGE_TOKEN
+#   variables MODRINTH_ID (the project's ID or slug), CURSEFORGE_ID (the numeric project ID)
+# A platform whose token or ID is missing is skipped.
 
 on:
   push:
     branches: [main, 'supported/**']
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Also publish the jars to Modrinth and CurseForge
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -23,8 +34,35 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+      MODRINTH_ID: ${{ vars.MODRINTH_ID }}
+      CURSEFORGE_ID: ${{ vars.CURSEFORGE_ID }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # the previous commit is needed to tell whether `version` was bumped
+
+      # Publish to Modrinth/CurseForge only for a new mod version: those sites refuse (or duplicate) a version that already exists.
+      - name: Decide whether to publish
+        id: gate
+        run: |
+          publish=false
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then
+            [ "${{ inputs.publish }}" = true ] && publish=true
+          else
+            before="${{ github.event.before }}"
+            now=$(grep -E '^version=' gradle.properties | cut -d= -f2 | tr -d '\r ')
+            if [ -z "$before" ] || [ -z "${before//0/}" ] || ! git cat-file -e "$before^{commit}" 2>/dev/null; then
+              publish=true   # a new branch or an unreachable previous commit: treat as new
+            else
+              old=$(git show "$before:gradle.properties" 2>/dev/null | grep -E '^version=' | cut -d= -f2 | tr -d '\r ')
+              [ "$old" != "$now" ] && publish=true
+            fi
+          fi
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "Publish to Modrinth/CurseForge: $publish"
 
       - name: Read versions
         id: v
@@ -68,6 +106,7 @@ jobs:
           if [ "${{ steps.build.outcome }}" = "success" ]; then
             cp fabric/build/libs/smartgolems-fabric-*.jar out/ || true
             cp neoforge/build/libs/smartgolems-neoforge-*.jar out/ || true
+            cp forge/build/libs/smartgolems-forge-*.jar out/ || true
             rm -f out/*-sources.jar
           fi
           ls -la out
@@ -90,10 +129,11 @@ jobs:
           **Files**
           - `smartgolems-fabric-@MC@-@VER@.jar`: Fabric (needs Fabric API)
           - `smartgolems-neoforge-@MC@-@VER@.jar`: NeoForge
+          - `smartgolems-forge-@MC@-@VER@.jar`: Forge
           - `install-windows.ps1`, `install-linux.sh`, `install-macos.sh`: installers for Windows, Linux and macOS (on Fabric they also install Fabric API if your `mods` folder has none; options in the README)
           - `smartgolems-@MC@-source.zip`: the exact source for this Minecraft version
 
-          **Install:** put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder, or run `install-windows.ps1` (Windows), `./install-linux.sh` (Linux) or `./install-macos.sh` (macOS) from the folder containing the jars. Add `-Loader neoforge` / `--loader neoforge` for NeoForge. Point the output at another folder (e.g. a server's `mods` folder) with `-ModsDir "<folder>"` (install-windows.ps1) or `--mods-dir <folder>` (install-linux.sh, install-macos.sh). Add `-NoDeps` / `--no-deps` to skip installing Fabric API.
+          **Install:** put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder, or run `install-windows.ps1` (Windows), `./install-linux.sh` (Linux) or `./install-macos.sh` (macOS) from the folder containing the jars. Add `-Loader neoforge` / `--loader neoforge` for NeoForge, or `-Loader forge` / `--loader forge` for Forge. Point the output at another folder (e.g. a server's `mods` folder) with `-ModsDir "<folder>"` (install-windows.ps1) or `--mods-dir <folder>` (install-linux.sh, install-macos.sh). Add `-NoDeps` / `--no-deps` to skip installing Fabric API.
 
           @STATUS@ This release is updated by every push to main while main targets Minecraft @MC@.
           NOTES
@@ -103,3 +143,92 @@ jobs:
           # Only main (the newest Minecraft version) is marked Latest; maintenance branches never take it over.
           latest=true; [ "${{ github.ref_name }}" = main ] || latest=false
           gh release create "$mc" out/* --target "$sha" --title "Smart Copper Golems $mc" --notes-file notes.md --latest=$latest
+
+      - name: Write changelog
+        if: steps.build.outcome == 'success' && steps.gate.outputs.publish == 'true'
+        run: |
+          {
+            echo "Smart Copper Golems ${{ steps.v.outputs.ver }} for Minecraft ${{ steps.v.outputs.mc }}."
+            echo
+            before="${{ github.event.before }}"
+            if [ -n "$before" ] && [ -n "${before//0/}" ] && git cat-file -e "$before^{commit}" 2>/dev/null; then
+              git log --no-merges --format='- %s' "$before..HEAD" | grep -v 'Render README' || true
+            else
+              git log -1 --format='- %s'
+            fi
+          } > changelog.md
+          cat changelog.md
+
+      # One Modrinth version carries all three loaders' jars.
+      - name: Publish to Modrinth
+        if: steps.build.outcome == 'success' && steps.gate.outputs.publish == 'true' && env.MODRINTH_TOKEN != '' && env.MODRINTH_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ env.MODRINTH_ID }}
+          modrinth-token: ${{ env.MODRINTH_TOKEN }}
+          files: |
+            out/smartgolems-fabric-*.jar
+            out/smartgolems-neoforge-*.jar
+            out/smartgolems-forge-*.jar
+          name: Smart Copper Golems ${{ steps.v.outputs.ver }} for Minecraft ${{ steps.v.outputs.mc }}
+          version: ${{ steps.v.outputs.ver }}+${{ steps.v.outputs.mc }}
+          version-type: release
+          changelog-file: changelog.md
+          loaders: |
+            fabric
+            neoforge
+            forge
+          game-versions: ${{ steps.v.outputs.mc }}
+          dependencies: |
+            fabric-api(required)
+
+      # CurseForge takes one loader per file, so each jar is its own upload.
+      - name: Publish Fabric to CurseForge
+        if: steps.build.outcome == 'success' && steps.gate.outputs.publish == 'true' && env.CURSEFORGE_TOKEN != '' && env.CURSEFORGE_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ env.CURSEFORGE_TOKEN }}
+          files: out/smartgolems-fabric-*.jar
+          name: Smart Copper Golems ${{ steps.v.outputs.ver }} (Fabric ${{ steps.v.outputs.mc }})
+          version: ${{ steps.v.outputs.ver }}+${{ steps.v.outputs.mc }}
+          version-type: release
+          changelog-file: changelog.md
+          loaders: fabric
+          game-versions: ${{ steps.v.outputs.mc }}
+          dependencies: |
+            fabric-api(required)
+
+      - name: Publish NeoForge to CurseForge
+        if: steps.build.outcome == 'success' && steps.gate.outputs.publish == 'true' && env.CURSEFORGE_TOKEN != '' && env.CURSEFORGE_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ env.CURSEFORGE_TOKEN }}
+          files: out/smartgolems-neoforge-*.jar
+          name: Smart Copper Golems ${{ steps.v.outputs.ver }} (NeoForge ${{ steps.v.outputs.mc }})
+          version: ${{ steps.v.outputs.ver }}+${{ steps.v.outputs.mc }}
+          version-type: release
+          changelog-file: changelog.md
+          loaders: neoforge
+          game-versions: ${{ steps.v.outputs.mc }}
+
+      - name: Publish Forge to CurseForge
+        if: steps.build.outcome == 'success' && steps.gate.outputs.publish == 'true' && env.CURSEFORGE_TOKEN != '' && env.CURSEFORGE_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: ${{ env.CURSEFORGE_ID }}
+          curseforge-token: ${{ env.CURSEFORGE_TOKEN }}
+          files: out/smartgolems-forge-*.jar
+          name: Smart Copper Golems ${{ steps.v.outputs.ver }} (Forge ${{ steps.v.outputs.mc }})
+          version: ${{ steps.v.outputs.ver }}+${{ steps.v.outputs.mc }}
+          version-type: release
+          changelog-file: changelog.md
+          loaders: forge
+          game-versions: ${{ steps.v.outputs.mc }}
+
+      - name: Note skipped platforms
+        if: steps.gate.outputs.publish == 'true'
+        run: |
+          [ -n "$MODRINTH_TOKEN" ] && [ -n "$MODRINTH_ID" ] || echo "::notice::Modrinth skipped: set the MODRINTH_TOKEN secret and the MODRINTH_ID variable."
+          [ -n "$CURSEFORGE_TOKEN" ] && [ -n "$CURSEFORGE_ID" ] || echo "::notice::CurseForge skipped: set the CURSEFORGE_TOKEN secret and the CURSEFORGE_ID variable."

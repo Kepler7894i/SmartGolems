@@ -3,7 +3,7 @@
 
 <img src="docs/gallery/icon-512-background.png" alt="The Overflow Chest" width="128" align="right">
 
-A **Fabric** and **NeoForge** mod for **Minecraft 26.2** that makes copper golems stop wandering from chest to chest looking for the right one. They know what is in every chest in range, walk straight to the right one, and leave items nobody wants in a dedicated **Overflow Chest**.
+A **Fabric**, **NeoForge** and **Forge** mod for **Minecraft 26.2** that makes copper golems stop wandering from chest to chest looking for the right one. They know what is in every chest in range, walk straight to the right one, and leave items nobody wants in a dedicated **Overflow Chest**.
 
 > The Minecraft version shown in this README is not typed in by hand: it is read from `minecraftVersion` in [gradle.properties](gradle.properties)
 > and filled in by `tools/RenderReadme.java` (run automatically on every push to `main`). Edit `README.template.md`, not `README.md`.
@@ -39,7 +39,7 @@ The icon and all screenshots are in [docs/gallery](docs/gallery): `icon-512.png`
 ## Requirements
 
 - Minecraft **26.2**
-- **Fabric**: [Fabric Loader](https://fabricmc.net/use/) 0.19.5 or newer and [Fabric API](https://modrinth.com/mod/fabric-api). **NeoForge**: [NeoForge](https://neoforged.net/) 26.2.0.88 or newer.
+- **Fabric**: [Fabric Loader](https://fabricmc.net/use/) 0.19.5 or newer and [Fabric API](https://modrinth.com/mod/fabric-api). **NeoForge**: [NeoForge](https://neoforged.net/) 26.2.0.88 or newer. **Forge**: [Forge](https://files.minecraftforge.net/) 26.2-65.1.3 or newer.
 - Java 25 (the Java Minecraft 26.2 itself uses)
 
 The golem behaviour runs on the **server**, so the mod must be installed there (in single player that is automatic). Because the Overflow Chest is a new block, clients that join need the mod too.
@@ -48,7 +48,7 @@ The golem behaviour runs on the **server**, so the mod must be installed there (
 
 Current target: **Minecraft 26.2**, mod version **1.1.0**.
 
-Jars are on the [Releases page](../../releases): `smartgolems-fabric-26.2-<version>.jar` and `smartgolems-neoforge-26.2-<version>.jar`. The easy way is the install script for your OS, which also fetches Fabric API if you are on Fabric and don't have it. Or do it by hand: put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder.
+Jars are on the [Releases page](../../releases): `smartgolems-fabric-26.2-<version>.jar` `smartgolems-neoforge-26.2-<version>.jar` and `smartgolems-forge-26.2-<version>.jar`. The easy way is the install script for your OS, which also fetches Fabric API if you are on Fabric and don't have it. Or do it by hand: put the jar for your loader (and, on Fabric, Fabric API) in your `mods` folder.
 
 ### Install scripts
 
@@ -67,7 +67,7 @@ Each script installs Smart Copper Golems into a `mods` folder and, on Fabric and
 | Purpose | Windows (`install-windows.ps1`) | Linux / macOS (`install-linux.sh`, `install-macos.sh`) | Default |
 | --- | --- | --- | --- |
 | Folder to install into (a server, another launcher's instance, ...) | `-ModsDir "<folder>"` | `--mods-dir <folder>` | Windows `%APPDATA%\.minecraft\mods`; Linux `~/.minecraft/mods`; macOS `~/Library/Application Support/minecraft/mods` |
-| Mod loader to install | `-Loader fabric` or `-Loader neoforge` | `--loader fabric` or `--loader neoforge` | `fabric` |
+| Mod loader to install | `-Loader fabric`, `-Loader neoforge` or `-Loader forge` | `--loader fabric`, `--loader neoforge` or `--loader forge` | `fabric` |
 | Don't compile, use the jar already built in `<loader>/build/libs` | `-SkipBuild` | `--skip-build` | compile when run from a checkout |
 | Don't install dependencies (Fabric API); only Smart Copper Golems | `-NoDeps` | `--no-deps` | install Fabric API if missing |
 | Show help | `Get-Help .\install-windows.ps1 -Full` | `--help` | |
@@ -140,18 +140,33 @@ Two versions are tracked, both only in [gradle.properties](gradle.properties):
 - `version`: the mod's own version (1.1.0).
 - `minecraftVersion`: the Minecraft version it targets (26.2).
 
-Everything else derives from them: the jar names (`smartgolems-<loader>-<minecraftVersion>-<version>.jar`), the mod metadata (`fabric.mod.json`, `neoforge.mods.toml`), the release tag, name and notes, the install scripts and this README.
+Everything else derives from them: the jar names (`smartgolems-<loader>-<minecraftVersion>-<version>.jar`), the mod metadata (`fabric.mod.json`, `neoforge.mods.toml`, `mods.toml`), the release tag, name and notes, the install scripts and this README.
 
-Every push to `main` runs [.github/workflows/release.yml](.github/workflows/release.yml), which builds the mod and publishes a release whose **tag is the Minecraft version**: the Fabric and NeoForge jars, the install scripts and a source snapshot (`smartgolems-<mc>-source.zip`). If the build fails the source snapshot is still published. When `main` moves to a newer Minecraft version, the older release stays, so the latest build for an older Minecraft version can always be downloaded from its tag.
+Every push to `main` runs [.github/workflows/release.yml](.github/workflows/release.yml), which builds the mod and publishes a release whose **tag is the Minecraft version**: the Fabric, NeoForge and Forge jars, the install scripts and a source snapshot (`smartgolems-<mc>-source.zip`). If the build fails the source snapshot is still published. When `main` moves to a newer Minecraft version, the older release stays, so the latest build for an older Minecraft version can always be downloaded from its tag.
 
 To release a change, bump `version` in `gradle.properties` (it follows [semantic versioning](https://semver.org/)) and push to `main`.
 
 Older Minecraft versions are maintained on `supported/<version>` branches, and pushing one of those refreshes that version's release too. Changes go on the oldest branch and are merged forward; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+### Publishing to Modrinth and CurseForge
+
+The release workflow also uploads the jars to the mod's Modrinth and CurseForge pages, but only when a push changes `version` in `gradle.properties` (or when you start the workflow by hand from the Actions tab with *publish* ticked). Ordinary pushes just refresh the GitHub release. Modrinth gets one version with the Fabric, NeoForge and Forge jars; CurseForge gets one file per loader. Fabric API is listed as a required dependency of the Fabric build.
+
+To turn it on, add these in the repository's *Settings > Secrets and variables > Actions*:
+
+| Kind | Name | Value |
+| --- | --- | --- |
+| Secret | `MODRINTH_TOKEN` | a Modrinth personal access token with the *Create versions* scope |
+| Secret | `CURSEFORGE_TOKEN` | a CurseForge API token (from your CurseForge account's API tokens page) |
+| Variable | `MODRINTH_ID` | the project's ID (or slug) from its Modrinth page |
+| Variable | `CURSEFORGE_ID` | the numeric project ID shown on the CurseForge project's overview |
+
+A platform whose token or ID is missing is skipped with a notice in the run log. The Minecraft version of the build has to exist as a game version on the platform, or that upload is rejected.
+
 ## Targeting another Minecraft version
 
 ```
-java tools/SetVersion.java <minecraft version>            # looks up and writes the matching Fabric API / Loader / NeoForge versions
+java tools/SetVersion.java <minecraft version>            # looks up and writes the matching Fabric API / Loader / NeoForge / Forge versions
 java tools/SetVersion.java <minecraft version> --dry-run  # only shows what it would change
 ```
 
@@ -159,9 +174,9 @@ That updates `gradle.properties` only (the README is re-rendered by `java tools/
 
 ## Building
 
-`./gradlew build` builds both loaders (Gradle downloads the required JDK 25 automatically); `./gradlew :fabric:build` or `./gradlew :neoforge:build` builds just one. The jars end up in `fabric/build/libs` and `neoforge/build/libs`. To try it in a development client or server: `./gradlew :fabric:runClient`, `:fabric:runServer`, `:neoforge:runClient`, `:neoforge:runServer` (`-PquickPlay=host:port` on `:neoforge:runClient` joins a server straight away).
+`./gradlew build` builds all three loaders (Gradle downloads the required JDK 25 automatically); `./gradlew :fabric:build` `./gradlew :neoforge:build` or `./gradlew :forge:build` builds just one. The jars end up in `fabric/build/libs` and `neoforge/build/libs`. To try it in a development client or server: `./gradlew :fabric:runClient`, `:fabric:runServer`, `:neoforge:runClient`, `:neoforge:runServer`, `:forge:runClient`, `:forge:runServer` (`-PquickPlay=host:port` on `:neoforge:runClient` joins a server straight away).
 
-The code is split like this: `common/` has everything that doesn't depend on a mod loader (the golem mixin, the Overflow Chest blocks, the config) and is compiled into both jars; `fabric/` and `neoforge/` only contain the thin entrypoints that register content and connect it to each loader's metadata. `tools/make_textures.py` and `tools/make_data.py` regenerate the Overflow Chest textures (from the vanilla copper chest ones) and its JSON data.
+The code is split like this: `common/` has everything that doesn't depend on a mod loader (the golem mixin, the Overflow Chest blocks, the config) and is compiled into all three jars; `fabric/`, `neoforge/` and `forge/` only contain the thin entrypoints that register content and connect it to each loader's metadata. `tools/make_textures.py` and `tools/make_data.py` regenerate the Overflow Chest textures (from the vanilla copper chest ones) and its JSON data.
 
 ## Licence
 
