@@ -2,10 +2,10 @@
 # Installs Smart Copper Golems (and, on Fabric, Fabric API if missing) into a Minecraft mods folder. Linux version;
 # see install-windows.ps1 (Windows) and install-macos.sh (macOS).
 #
-# Usage: ./install-linux.sh [--mods-dir DIR] [--loader fabric|neoforge] [--skip-build] [--no-deps]
+# Usage: ./install-linux.sh [--mods-dir DIR] [--loader fabric|neoforge|forge] [--skip-build] [--no-deps]
 #
 #   --mods-dir DIR  target mods folder (default ~/.minecraft/mods); use it for a server or another launcher's instance
-#   --loader NAME   fabric (default) or neoforge
+#   --loader NAME   fabric (default), neoforge or forge
 #   --skip-build    use the jar already in <loader>/build/libs instead of rebuilding
 #   --no-deps       do not install dependencies (Fabric API); only Smart Copper Golems itself
 #
@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
     *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
 done
-case "$loader" in fabric|neoforge) ;; *) echo "--loader must be fabric or neoforge" >&2; exit 2 ;; esac
+case "$loader" in fabric|neoforge|forge) ;; *) echo "--loader must be fabric, neoforge or forge" >&2; exit 2 ;; esac
 
 prop() { [ -f "$root/gradle.properties" ] && grep -E "^$1=" "$root/gradle.properties" | head -n1 | cut -d= -f2- | tr -d '\r ' || true; }
 

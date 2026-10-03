@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  *   java tools/SetVersion.java <minecraft version> [--dry-run]
  *
  * gradle.properties is the single source of truth for the target: the build, the mod metadata, the release name and tag,
- * the release notes and the installers are all derived from it. This tool looks up the matching Fabric API and NeoForge
+ * the release notes and the installers are all derived from it. This tool looks up the matching Fabric API, NeoForge and Forge
  * versions for the Minecraft version and the latest Fabric Loader, and rewrites gradle.properties. It cannot port the code
  * to the new Minecraft version; after running it, build and fix whatever the new version broke.
  */
@@ -50,6 +50,10 @@ public class SetVersion {
         // Prefer a stable NeoForge; right after a Minecraft release only betas may exist.
         String neoForgeVersion = last(neoStable.isEmpty() ? neo : neoStable, "NeoForge for " + mc);
 
+        List<String> forge = versions(http, "https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml").stream()
+            .filter(v -> v.startsWith(target + "-")).toList();
+        String forgeVersion = last(forge, "Forge for " + mc);
+
         String loader = release(http, "https://maven.fabricmc.net/net/fabricmc/fabric-loader/maven-metadata.xml", "Fabric Loader");
 
         String[][] updates = {
@@ -57,6 +61,7 @@ public class SetVersion {
             {"fabricLoaderVersion", loader},
             {"fabricApiVersion", fabricApiVersion},
             {"neoforgeVersion", neoForgeVersion},
+            {"forgeVersion", forgeVersion},
         };
 
         String text = Files.readString(props, StandardCharsets.UTF_8);

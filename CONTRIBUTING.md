@@ -48,9 +48,9 @@ git push origin main                # publishes the 26.3 release
 
 If there are several maintained versions, merge through them in order (`supported/26.2` → `supported/26.3` → `main`).
 
-**Conflicts.** They usually only happen in lines the port touched. Keep the **newer** branch's version of those lines (for example its `minecraftVersion`, `neoforgeVersion` and any renamed API call) and the shared change from the older one. Don't resolve a conflict by taking the old version of a port line: that breaks the newer build.
+**Conflicts.** They usually only happen in lines the port touched. Keep the **newer** branch's version of those lines (for example its `minecraftVersion`, `neoforgeVersion`, `forgeVersion` and any renamed API call) and the shared change from the older one. Don't resolve a conflict by taking the old version of a port line: that breaks the newer build.
 
-**Version numbers.** `version` (the mod's own version) is shared. Bump it on the oldest branch together with the change so merging brings the bump along. `minecraftVersion`, `fabricLoaderVersion`, `fabricApiVersion` and `neoforgeVersion` belong to each branch and must not be overwritten by a merge; if git shows a conflict there, keep the newer branch's values.
+**Version numbers.** `version` (the mod's own version) is shared. Bump it on the oldest branch together with the change so merging brings the bump along. `minecraftVersion`, `fabricLoaderVersion`, `fabricApiVersion`, `neoforgeVersion` and `forgeVersion` belong to each branch and must not be overwritten by a merge; if git shows a conflict there, keep the newer branch's values.
 
 ### Why the `supported/` prefix
 
@@ -70,6 +70,6 @@ Stop merging into its branch and delete it (or leave it as a frozen branch). Its
 
 ## Building and testing
 
-`./gradlew build` builds both loaders. There are no automated tests, so before opening a pull request please start a dev server for each loader you touched (`./gradlew :fabric:runServer`, `:neoforge:runServer`) and, for anything client-side, a dev client (`:fabric:runClient`, `:neoforge:runClient`).
+`./gradlew build` builds all three loaders (Fabric, NeoForge, Forge). There are no automated tests, so before opening a pull request please start a dev server for each loader you touched (`./gradlew :fabric:runServer`, `:neoforge:runServer`, `:forge:runServer`) and, for anything client-side, a dev client (`:fabric:runClient`, `:neoforge:runClient`, `:forge:runClient`).
 
-The loader-independent code lives in `common/`; `fabric/` and `neoforge/` should only contain thin glue to each loader's events.
+The loader-independent code lives in `common/`; `fabric/`, `neoforge/` and `forge/` should only contain thin glue to each loader's events.
